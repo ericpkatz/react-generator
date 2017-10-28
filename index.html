@@ -38,6 +38,47 @@
       static Components(models){
         return `
           ${ models.map( model => AppGenerator.Component(model)).join('') }
+          const Home = ()=> {
+            return (
+              <div className='well'>
+                Home
+              </div>
+            );
+          };
+        `;
+      }
+      static Route(model){
+        return `
+          <Route path='/${model.name}' component={${ model.name }} />
+        `;
+      }
+      static Routes(models){
+        return `
+          <Route component={ Nav } />
+          <Route path='/' exact component={ Home } />
+          ${ models.map( model => AppGenerator.Route(model)).join('') }
+        `;
+      }
+      static Nav(models){
+        return `
+          const Nav = ()=> {
+              return ( 
+              <ul className='nav nav-tabs'>
+                <li>
+                  <Link to='/'>Home</Link>
+                </li>
+                ${ models.map( model => {
+                  return (
+                    `
+                      <li>
+                        <Link to='/${ model.name }'>${ model.name }</Link>
+                      </li>
+                    `
+                  );
+                }).join('')}
+              </ul>
+            );
+          };
         `;
       }
       static scripts(){
@@ -67,11 +108,20 @@
         <div id='root'></div>
       </body>
       <${script} type='text/babel'>
-        const { HashRouter, Route } = ReactRouterDOM;
+        const { Link, HashRouter, Route, Switch } = ReactRouterDOM;
         const Router = HashRouter;
+        ${AppGenerator.Nav( models )}
         ${AppGenerator.Components( models )}
+
+
         const root = document.getElementById('root');
-        ReactDOM.render(<div>${name}<${models[0].name} /></div>, root);
+        ReactDOM.render((
+<Router>
+<div>
+${ AppGenerator.Routes(models)}
+</div>
+</Router>
+), root);
       </${script}>
    </html>
         `;
