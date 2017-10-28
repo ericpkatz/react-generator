@@ -1,0 +1,150 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"></script>
+    <script crossorigin src="https://unpkg.com/react@15/dist/react.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@15/dist/react-dom.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/react-router/4.2.0/react-router.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/react-router-dom/4.2.2/react-router-dom.min.js'></script>
+    <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' />
+<style>
+  .vertical-margin {
+    margin: 10px 0;
+  }
+</style>
+  </head>
+  <body>
+    <div id='root'></div>
+  </body>
+  <script type='text/babel'>
+    const { Component } = React;
+    const { render } = ReactDOM;
+    const { HashRouter, Route, Switch, Link } = ReactRouterDOM; 
+    const Router = HashRouter;
+
+    class AppGenerator{
+      static generate(str){
+        const app = JSON.parse(decodeURIComponent(str));
+        const { name, models } = app;
+        console.log(name);
+      }
+    }
+
+    const Home = ()=> {
+      return (
+        <div className='well'>Home</div>
+      );
+    }
+
+    const defaultApp = `{
+  "name": "greatest app ever!",
+  "models": [
+    {
+      "name": "User",
+      "attr": {
+        "firstName": "string",
+        "lastName": "string"
+      }
+    }
+  ]
+}`;
+
+   const Generated = ()=> {
+      return (
+        <div>Generated</div>
+      );
+   };
+    
+
+    class Generator extends Component {
+      constructor(props){
+        super();
+        let app = defaultApp;
+        if(props.match.params.app){
+          app = decodeURIComponent(props.match.params.app);
+          console.log(AppGenerator);
+          AppGenerator.generate(props.match.params.app);
+           
+        }
+        this.state = { app , error: {} };
+        this.generate = this.generate.bind(this);
+        this.onChange = this.onChange.bind(this);
+      }
+      onChange(ev){
+        this.setState({ app: ev.target.value });
+        try{
+          JSON.parse(ev.target.value);
+          this.setState({ error: {}});
+        }
+        catch(ex){
+          this.setState({ error: { message: 'must be an object'}});
+        }
+      }
+      componentWillReceiveProps(props){
+        AppGenerator.generate(props.match.params.app);
+      }
+      generate(){
+        const appParam = encodeURIComponent(JSON.stringify(JSON.parse(this.state.app)));
+        this.props.history.push(`/generator/${appParam}`);
+      }
+      render(){
+        const { generate, onChange } = this;
+        const { app, error } = this.state;
+        const pretty = (str)=> {
+          try{
+            return JSON.stringify(JSON.parse(str), null, 2);
+          }
+          catch(ex){
+            return str;
+          }
+        }
+        return (
+          <div>
+          <div className='well'>
+            <textarea rows='10' className='form-control' onChange={ onChange } value={ pretty(app) }>
+            </textarea>
+            <button disabled={ error.message } className='btn btn-primary vertical-margin' onClick={ generate }>Generate App</button>
+            {
+              error.message && (
+                <div className='alert alert-danger'>{ error.message }</div>
+              )
+            }
+          </div>
+          </div>
+        );
+      }
+    }
+
+    const Nav = ({ location })=> {
+      const isSelected = (pathname)=> {
+        return location.pathname === pathname;
+      }
+      return (
+            <div>
+              <ul className='nav nav-tabs vertical-margin'>
+                <li className={ isSelected('/') ? 'active' : '' }>
+                  <Link to='/'>Home</Link>
+                </li>
+                <li className={ isSelected('/generator') ? 'active' : '' }>
+                  <Link to='/generator'>Generator</Link>
+                </li>
+              </ul>
+            </div>
+      );
+    }
+    
+    const App = ()=> {
+      return (
+        <Router>
+          <div className='container'>
+            <Route component={ Nav }  />
+            <Switch>
+              <Route path='/' exact component={ Home } />
+              <Route path='/generator/:app?' component={ Generator } />
+            </Switch>
+          </div>
+        </Router>
+      );
+    }
+    render(<App />, document.getElementById('root'));
+  </script>
+</html>
