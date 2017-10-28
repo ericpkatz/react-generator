@@ -1,13 +1,20 @@
 class AppGenerator{
   static Component(model){
     return `
-      const ${pluralize(model.name)} = () => {
+      const _${pluralize(model.name)} = ({${ pluralize(model.name) }}) => {
         return (
           <div className='well'>
             ${ pluralize(model.name) }
+            ({ ${ pluralize(model.name) }.length}) 
           </div>
         );
       };
+      const ${pluralize(model.name)}Mapper = ({${pluralize(model.name)}})=> {
+        return {
+          ${pluralize(model.name)}
+        };
+      };
+      const ${pluralize(model.name)} = connect(${pluralize(model.name)}Mapper)(_${pluralize(model.name)}); 
     `;
   }
   static Components(models){
@@ -60,6 +67,17 @@ class AppGenerator{
       };
     `;
   }
+  static reducers(models){
+    return `{
+      ${ models.map( model => {
+        return `
+          ${pluralize(model.name)}: (state = [], action)=> {
+            return state;
+          }
+        `
+      }) }
+      }`;
+  }
   static scripts(){
     const script = 'script';
     return `
@@ -69,6 +87,9 @@ class AppGenerator{
 <${script} crossorigin src="https://unpkg.com/react-dom@15/dist/react-dom.js"></${script}>
 <${script} src='https://cdnjs.cloudflare.com/ajax/libs/react-router/4.2.0/react-router.js'></${script}>
 <${script} src='https://cdnjs.cloudflare.com/ajax/libs/react-router-dom/4.2.2/react-router-dom.min.js'></${script}>
+<${script} src='https://cdnjs.cloudflare.com/ajax/libs/redux/3.7.2/redux.js'></${script}>
+<${script} src='https://cdnjs.cloudflare.com/ajax/libs/react-redux/5.0.6/react-redux.js'></${script}>
+<${script} src='https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/2.2.0/redux-thunk.js'></${script}>
 <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' />
 `;
 
@@ -89,17 +110,25 @@ class AppGenerator{
   <${script} type='text/babel'>
     const { Link, HashRouter, Route, Switch } = ReactRouterDOM;
     const Router = HashRouter;
+    const { Provider, connect } = ReactRedux;
+    const { createStore, combineReducers } = Redux;
+
+    const store = createStore(combineReducers(
+      ${ AppGenerator.reducers(models) }
+    ));
     ${AppGenerator.Nav( models )}
     ${AppGenerator.Components( models )}
 
 
     const root = document.getElementById('root');
     ReactDOM.render((
+<Provider store={ store }>
 <Router>
 <div>
 ${ AppGenerator.Routes(models)}
 </div>
 </Router>
+</Provider>
 ), root);
   </${script}>
 </html>
