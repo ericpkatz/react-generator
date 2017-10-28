@@ -1,4 +1,21 @@
 class AppGenerator{
+  static Dispatch(models){
+    return `
+    const mapDispatchToProps = (dispatch)=> {
+      return {
+        init: ()=> {
+          ${ models.reduce( (memo, model) => {
+            if(model.fetchOnMount){
+              memo.push(`dispatch(fetch${pluralize(model.name)}());`);
+            }
+            return memo;
+
+          }, []).join('') }
+        }
+      };
+    };
+    `;
+  }
   static Component(model){
     return `
       const _${pluralize(model.name)} = ({${ pluralize(model.name) }}) => {
@@ -31,15 +48,13 @@ class AppGenerator{
   }
   static Route(model){
     return `
-      <Route path='/${pluralize(model.name)}' component={${ pluralize(model.name) }} />
-    `;
+      <Route path='/${pluralize(model.name)}' component={${ pluralize(model.name) }} />`;
   }
   static Routes(models){
     return `
       <Route component={ Nav } />
       <Route path='/' exact component={ Home } />
-      ${ models.map( model => AppGenerator.Route(model)).join('') }
-    `;
+      ${ models.map( model => AppGenerator.Route(model)).join('') }`;
   }
   static Nav(models){
     return `
@@ -109,6 +124,7 @@ class AppGenerator{
   </body>
   <${script} type='text/babel'>
     const { Link, HashRouter, Route, Switch } = ReactRouterDOM;
+    const { Component } = React;
     const Router = HashRouter;
     const { Provider, connect } = ReactRedux;
     const { createStore, combineReducers } = Redux;
@@ -119,17 +135,32 @@ class AppGenerator{
     ${AppGenerator.Nav( models )}
     ${AppGenerator.Components( models )}
 
+    class _Routes extends Component{
+      componentDidMount(){
+        this.props.init();
+      }
+      render(){
+        return (<Router><div>${ AppGenerator.Routes(models)}</div></Router>);
+      }
+    };
+
+    const mapStateToProps = (state)=> {
+      return state;
+    };
+
+    ${ AppGenerator.Dispatch(models) }
+
+    const Routes = connect(mapStateToProps, mapDispatchToProps)(_Routes);
+
+    const App = ()=> {
+      return (
+        <Provider store={ store }><Routes /></Provider>
+      );
+    };
+
 
     const root = document.getElementById('root');
-    ReactDOM.render((
-<Provider store={ store }>
-<Router>
-<div>
-${ AppGenerator.Routes(models)}
-</div>
-</Router>
-</Provider>
-), root);
+    ReactDOM.render(<App />, root);
   </${script}>
 </html>
     `;
