@@ -15,10 +15,6 @@
   </head>
   <body>
     <div id='root'></div>
-    <iframe id='appFrame' width='100%'>
-    </iframe>
-    <pre id='codePreview'>
-    </pre>
   </body>
 
   <script type='text/babel'>
@@ -28,6 +24,22 @@
     const Router = HashRouter;
 
     class AppGenerator{
+      static Component(model){
+        return `
+          const ${model.name} = () => {
+            return (
+              <div className='well'>
+                ${model.name}
+              </div>
+            );
+          };
+        `;
+      }
+      static Components(models){
+        return `
+          ${ models.map( model => AppGenerator.Component(model)).join('') }
+        `;
+      }
       static scripts(){
         const script = 'script';
         return `
@@ -55,8 +67,11 @@
         <div id='root'></div>
       </body>
       <${script} type='text/babel'>
+        const { HashRouter, Route } = ReactRouterDOM;
+        const Router = HashRouter;
+        ${AppGenerator.Components( models )}
         const root = document.getElementById('root');
-        ReactDOM.render(<div>${name}</div>, root);
+        ReactDOM.render(<div>${name}<${models[0].name} /></div>, root);
       </${script}>
    </html>
         `;
@@ -84,15 +99,38 @@ iframe.attr(
         "firstName": "string",
         "lastName": "string"
       }
+    },
+    {
+      "name": "Thing",
+      "attr": {
+        "name": "string",
+        "price": "integer"
+      }
     }
   ]
 }`;
 
-   const Generated = ()=> {
+  class Generated extends Component{
+    constructor({ app }){
+      super();
+    }
+    componentDidMount(){
+      AppGenerator.generate(this.props.app);
+    }
+    shouldComponentUpdate(){
+        return false;
+    }
+    render(){
       return (
-        <div>Generated</div>
+        <div>
+          <iframe id='appFrame' width='100%'>
+          </iframe>
+          <pre id='codePreview'>
+          </pre>
+        </div>
       );
-   };
+    }
+   }
     
 
     class Generator extends Component {
@@ -148,6 +186,11 @@ iframe.attr(
               )
             }
           </div>
+          {
+            !error.message && (
+              <Generated app={ app }/>
+            )
+          }
           </div>
         );
       }
