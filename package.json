@@ -1,0 +1,24 @@
+{
+  "name": "react-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ericpkatz/react-generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ericpkatz/react-generator/issues"
+  },
+  "homepage": "https://github.com/ericpkatz/react-generator#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
