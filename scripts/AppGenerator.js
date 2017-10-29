@@ -263,5 +263,6 @@ iframe.attr(
 "src", "data:text/html;charset=utf-8," + 
 html
 );
+    hljs.initHighlightingOnLoad();
   }
 }
