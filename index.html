@@ -79,7 +79,7 @@
   ]
 }`;
 
-  class Generated extends Component{
+  class GeneratedApp extends Component{
     constructor({ app }){
       super();
     }
@@ -92,8 +92,10 @@
     render(){
       return (
         <div>
-          <iframe id='appFrame' width='100%'>
+          <h2>Your App</h2>
+          <iframe id='appFrame' width='100%' height='400px'>
           </iframe>
+          <h2>Your Code</h2>
           <pre id='codePreview'>
           </pre>
         </div>
@@ -117,7 +119,6 @@
             message: 'error'
           });
         }
-        //this.setState({ error: { message: errors.length ? 'error' : null }});
       });
     }
     shouldComponentUpdate(){
@@ -126,8 +127,11 @@
     render(){
       const { code } = this.props;
       return (
-        <div id='editor' style={{ height: '300px'}}>
-          { code }
+        <div>
+          <h2>Your Configuration</h2>
+          <div id='editor' style={{ height: '300px'}}>
+            { code }
+          </div>
         </div>
       );
     }
@@ -173,7 +177,8 @@
         }
         return (
           <div>
-          <div className='well'>
+          <div className='row'>
+            <div className='col-xs-6'>
             <Editor code={pretty(app)} setError={ setError } setCode={setCode }/>
             <button disabled={ error.message } className='btn btn-primary vertical-margin' onClick={ generate }>Generate App</button>
             {
@@ -181,12 +186,15 @@
                 <div className='alert alert-danger'>{ error.message }</div>
               )
             }
+            </div>
+            <div className='col-xs-6'>
+            {
+              !error.message && (
+                <GeneratedApp app={ app }/>
+              )
+            }
+            </div>
           </div>
-          {
-            !error.message && (
-              <Generated app={ app }/>
-            )
-          }
           </div>
         );
       }
