@@ -16,6 +16,21 @@ class AppGenerator{
     };
     `;
   }
+  static State(models){
+    const injectedState = models.reduce((memo, model)=> {
+      if(model.fetchOnMount){
+        memo.push(pluralize(model.name));
+      }
+      return memo;
+    }, []);
+    return `
+    const mapStateToProps = ({ ${ injectedState.join(', ')} })=> {
+      return {
+        ${ injectedState.join(',') }
+      };
+    };
+    `;
+  }
   static Component(model){
     return `
       const _${pluralize(model.name)} = ({${ pluralize(model.name) }}) => {
@@ -32,6 +47,17 @@ class AppGenerator{
         };
       };
       const ${pluralize(model.name)} = connect(${pluralize(model.name)}Mapper)(_${pluralize(model.name)}); 
+
+      const fetch${pluralize(model.name)} = ()=> {
+        return (dispatch)=> {
+          const key = 'DS-${pluralize(model.name)}';
+          const data = ${ JSON.stringify( model.initialData )};
+          dispatch({
+            type: 'SET_${pluralize(model.name)}',
+            data
+          });
+        };
+      };
     `;
   }
   static Components(models){
@@ -51,14 +77,28 @@ class AppGenerator{
       <Route path='/${pluralize(model.name)}' component={${ pluralize(model.name) }} />`;
   }
   static Routes(models){
+    const injectedState = models.reduce((memo, model)=> {
+      const pluralizedModel = pluralize(model.name); 
+      if(model.fetchOnMount){
+        memo.push(`${pluralizedModel}={this.props.${ pluralizedModel }}`);
+      }
+      return memo;
+    }, []);
     return `
-      <Route component={ Nav } />
+      <Route render={ ({ location } )=> <Nav location={ location } ${ injectedState.join(' ') }/> } />
       <Route path='/' exact component={ Home } />
       ${ models.map( model => AppGenerator.Route(model)).join('') }`;
   }
   static Nav(models){
+    const injectedState = models.reduce((memo, model)=> {
+      const pluralizedModel = pluralize(model.name); 
+      if(model.fetchOnMount){
+        memo.push(pluralizedModel);
+      }
+      return memo;
+    }, []);
     return `
-      const Nav = ({ location })=> {
+      const Nav = ({ location, ${injectedState.join(', ')} })=> {
           const isSelected = (pathname, startsWith)=> {
             return pathname === location.pathname || ( startsWith && location.pathname.indexOf(pathname) === 0 );
 
@@ -69,10 +109,18 @@ class AppGenerator{
               <Link to='/'>Home</Link>
             </li>
             ${ models.map( model => {
+              const pluralized = pluralize(model.name);
               return (
                 `
                 <li className={ isSelected('/${ pluralize( model.name )}', true) ? 'active' : '' }>
-                    <Link to='/${ pluralize(model.name) }'>${ pluralize(model.name) }</Link>
+                    <Link to='/${ pluralize(model.name) }'>
+                      ${ pluralized }
+                      {
+                        Array.isArray(${ pluralized }) && (
+                          <span className='badge'>{ ${ pluralized}.length }</span>
+                        ) 
+                      }
+                    </Link>
                   </li>
                 `
               );
@@ -87,6 +135,11 @@ class AppGenerator{
       ${ models.map( model => {
         return `
           ${pluralize(model.name)}: (state = [], action)=> {
+            switch(action.type){
+              case 'SET_${pluralize(model.name)}':
+                state = action.data;
+                break;
+            }
             return state;
           }
         `
@@ -127,11 +180,12 @@ class AppGenerator{
     const { Component } = React;
     const Router = HashRouter;
     const { Provider, connect } = ReactRedux;
-    const { createStore, combineReducers } = Redux;
+    const { createStore, combineReducers, applyMiddleware } = Redux;
 
     const store = createStore(combineReducers(
       ${ AppGenerator.reducers(models) }
-    ));
+    ), applyMiddleware(ReduxThunk.default));
+
     ${AppGenerator.Nav( models )}
     ${AppGenerator.Components( models )}
 
@@ -144,9 +198,7 @@ class AppGenerator{
       }
     };
 
-    const mapStateToProps = (state)=> {
-      return state;
-    };
+    ${ AppGenerator.State(models) }
 
     ${ AppGenerator.Dispatch(models) }
 
