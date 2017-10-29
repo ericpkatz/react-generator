@@ -134,7 +134,7 @@ class AppGenerator{
 
           };
           return ( 
-          <ul className='nav nav-tabs'>
+          <ul style={{ marginBottom: '10px'}} className='nav nav-tabs'>
             <li className={ isSelected('/') ? 'active' : '' }>
               <Link to='/'>Home</Link>
             </li>
