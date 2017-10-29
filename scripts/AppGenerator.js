@@ -82,7 +82,8 @@ class AppGenerator{
       };
     `;
   }
-  static Components(models){
+  static Components(config){
+    const { models, name } = config;
     return `
       ${ models.map( model => AppGenerator.Component(model)).join('') }
       const Home = ()=> {
@@ -90,6 +91,12 @@ class AppGenerator{
           <div className='well'>
             Home
           </div>
+        );
+      };
+
+      const Title = ()=> {
+        return (
+          <h2>${ name }</h2>
         );
       };
     `;
@@ -107,6 +114,7 @@ class AppGenerator{
       return memo;
     }, []);
     return `
+      <Route component={ Title } />
       <Route render={ ({ location } )=> <Nav location={ location } ${ injectedState.join(' ') }/> } />
       <Route path='/' exact component={ Home } />
       ${ models.map( model => AppGenerator.Route(model)).join('') }`;
@@ -180,6 +188,7 @@ class AppGenerator{
 <${script} src='https://cdnjs.cloudflare.com/ajax/libs/redux/3.7.2/redux.js'></${script}>
 <${script} src='https://cdnjs.cloudflare.com/ajax/libs/react-redux/5.0.6/react-redux.js'></${script}>
 <${script} src='https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/2.2.0/redux-thunk.js'></${script}>
+<${script} src='https://cdn.jsdelivr.net/npm/redux-logger@3.0.6/dist/redux-logger.min.js'></${script}>
 <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' />
 `;
 
@@ -204,17 +213,18 @@ class AppGenerator{
     const { Provider, connect } = ReactRedux;
 
     const { createStore, combineReducers, applyMiddleware } = Redux;
+    const { createLogger } = reduxLogger;
 
     ${AppGenerator.Comment( 'SET UP STORE' )}
 
     const store = createStore(combineReducers(
       ${ AppGenerator.reducers(models) }
-    ), applyMiddleware(ReduxThunk.default));
+    ), applyMiddleware(createLogger({})), applyMiddleware(ReduxThunk.default));
 
     ${AppGenerator.Comment( 'SET UP NAV' )}
     ${AppGenerator.Nav( models )}
     ${AppGenerator.Comment( 'SET UP COMPONENTS' )}
-    ${AppGenerator.Components( models )}
+    ${AppGenerator.Components( app )}
 
     ${AppGenerator.Comment( 'SET UP ROUTES' )}
 
@@ -223,7 +233,7 @@ class AppGenerator{
         this.props.init();
       }
       render(){
-        return (<Router><div>${ AppGenerator.Routes(models)}</div></Router>);
+        return (<Router><div className='container'>${ AppGenerator.Routes(models)}</div></Router>);
       }
     };
 

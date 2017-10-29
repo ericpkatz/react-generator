@@ -9,6 +9,7 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/react-router-dom/4.2.2/react-router-dom.min.js'></script>
     <script src='/scripts/AppGenerator.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/pluralize/7.0.0/pluralize.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js'></script>
     <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' />
 <style>
   .vertical-margin {
@@ -100,6 +101,37 @@
     }
    }
     
+   class Editor extends Component{
+    componentDidMount(){
+      var editor = ace.edit("editor");
+      editor.setTheme("ace/theme/monokai");
+      editor.getSession().setMode("ace/mode/json");
+      editor.on('change', ()=> {
+        try{
+          this.props.setCode(editor.getValue());
+          JSON.parse(editor.getValue());
+          this.props.setError({});
+        }
+        catch(ex){
+          this.props.setError({
+            message: 'error'
+          });
+        }
+        //this.setState({ error: { message: errors.length ? 'error' : null }});
+      });
+    }
+    shouldComponentUpdate(){
+      return false;
+    }
+    render(){
+      const { code } = this.props;
+      return (
+        <div id='editor' style={{ height: '300px'}}>
+          { code }
+        </div>
+      );
+    }
+   }
 
     class Generator extends Component {
       constructor(props){
@@ -112,23 +144,14 @@
         }
         this.state = { app , error: {} };
         this.generate = this.generate.bind(this);
-        this.onChange = this.onChange.bind(this);
-        this.onKeyDown = this.onKeyDown.bind(this);
+        this.setError = this.setError.bind(this);
+        this.setCode = this.setCode.bind(this);
       }
-      onKeyDown(ev){
-        if(ev.keyCode === 13){
-          ev.stopPropagation();
-        }
+      setError(error){
+        this.setState({ error });
       }
-      onChange(ev){
-        this.setState({ app: ev.target.value });
-        try{
-          JSON.parse(ev.target.value);
-          this.setState({ error: {}});
-        }
-        catch(ex){
-          this.setState({ error: { message: 'must be an object'}});
-        }
+      setCode(code){
+        this.setState({ app: code });
       }
       componentWillReceiveProps(props){
         AppGenerator.generate(props.match.params.app);
@@ -138,7 +161,7 @@
         this.props.history.push(`/generator/${appParam}`);
       }
       render(){
-        const { generate, onChange, onKeyDown } = this;
+        const { generate, setError, setCode } = this;
         const { app, error } = this.state;
         const pretty = (str)=> {
           try{
@@ -151,8 +174,7 @@
         return (
           <div>
           <div className='well'>
-            <textarea rows='10' className='form-control' onChange={ onChange } value={ pretty(app) } onKeyDown={ onKeyDown }>
-            </textarea>
+            <Editor code={pretty(app)} setError={ setError } setCode={setCode }/>
             <button disabled={ error.message } className='btn btn-primary vertical-margin' onClick={ generate }>Generate App</button>
             {
               error.message && (
