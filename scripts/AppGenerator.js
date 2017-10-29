@@ -16,6 +16,13 @@ class AppGenerator{
     };
     `;
   }
+  static Comment(comment){
+    return `
+    /*********************
+     * ${comment}
+     *********************/
+    `;
+  }
   static State(models){
     const injectedState = models.reduce((memo, model)=> {
       if(model.fetchOnMount){
@@ -32,7 +39,9 @@ class AppGenerator{
     `;
   }
   static Component(model){
+    const pluralized = pluralize(model.name); 
     return `
+      ${AppGenerator.Comment( `SET UP COMPONENT ${pluralized}` )}
       const _${pluralize(model.name)} = ({${ pluralize(model.name) }}) => {
         return (
           <div className='well'>
@@ -60,9 +69,10 @@ class AppGenerator{
       };
       const ${pluralize(model.name)} = connect(${pluralize(model.name)}Mapper)(_${pluralize(model.name)}); 
 
+      ${AppGenerator.Comment( `Action Creator for ${pluralized}` )}
       const fetch${pluralize(model.name)} = ()=> {
         return (dispatch)=> {
-          const key = 'DS-${pluralize(model.name)}';
+          ${AppGenerator.Comment(`Hook into API to load ${pluralized}` )}
           const data = ${ JSON.stringify( model.initialData )};
           dispatch({
             type: 'SET_${pluralize(model.name)}',
@@ -192,14 +202,21 @@ class AppGenerator{
     const { Component } = React;
     const Router = HashRouter;
     const { Provider, connect } = ReactRedux;
+
     const { createStore, combineReducers, applyMiddleware } = Redux;
+
+    ${AppGenerator.Comment( 'SET UP STORE' )}
 
     const store = createStore(combineReducers(
       ${ AppGenerator.reducers(models) }
     ), applyMiddleware(ReduxThunk.default));
 
+    ${AppGenerator.Comment( 'SET UP NAV' )}
     ${AppGenerator.Nav( models )}
+    ${AppGenerator.Comment( 'SET UP COMPONENTS' )}
     ${AppGenerator.Components( models )}
+
+    ${AppGenerator.Comment( 'SET UP ROUTES' )}
 
     class _Routes extends Component{
       componentDidMount(){
@@ -215,6 +232,8 @@ class AppGenerator{
     ${ AppGenerator.Dispatch(models) }
 
     const Routes = connect(mapStateToProps, mapDispatchToProps)(_Routes);
+
+    ${AppGenerator.Comment( 'SET UP App' )}
 
     const App = ()=> {
       return (
