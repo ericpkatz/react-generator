@@ -13,7 +13,7 @@
 <link rel="stylesheet"
       href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-    <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' />
+    <link href='/css/bootstrap.css' rel='stylesheet' />
 <style>
   .vertical-margin {
     margin: 10px 0;
@@ -27,13 +27,30 @@
   <script type='text/babel'>
     const { Component } = React;
     const { render } = ReactDOM;
-    const { HashRouter, Route, Switch, Link } = ReactRouterDOM; 
+    const { HashRouter, Route, Switch, Link, Redirect } = ReactRouterDOM; 
     const Router = HashRouter;
 
 
     const Home = ()=> {
       return (
-        <div className='well'>Home</div>
+        <div>
+        <div className='well'>
+          <h1>Tired of writing React Boilerplate??</h1>
+          Generate your React application with a simple configuration object!
+          <ul>
+            <li>
+              <h2>Connected components generated!</h2>
+            </li>
+            <li>
+              <h2>Redux stores and reducers generated!</h2>
+            </li>
+            <li>
+              <h2>Redux Thunk middlware included!</h2>
+            </li>
+          </ul>
+        </div>
+
+        </div>
       );
     }
 
@@ -129,9 +146,11 @@
    class Editor extends Component{
     componentDidMount(){
       var editor = ace.edit("editor");
+      this.editor = editor;
       editor.setTheme("ace/theme/monokai");
       editor.getSession().setMode("ace/mode/json");
       editor.on('change', ()=> {
+      console.log('change');
         try{
           this.props.setCode(editor.getValue());
           JSON.parse(editor.getValue());
@@ -143,6 +162,13 @@
           });
         }
       });
+    }
+    componentWillReceiveProps(props){
+      const str = decodeURIComponent(props.match.params.app);
+      const code = JSON.stringify(JSON.parse(str), null, 2);
+      if(this.editor.getValue() !== code){
+        this.editor.setValue(code);
+      }
     }
     shouldComponentUpdate(){
       return false;
@@ -200,9 +226,12 @@
         }
         return (
           <div>
+            <Link to={`/generator/${encodeURIComponent(JSON.stringify({ name: 'Simple', models:[ { name: 'Foo' }]}))}`}>Simple</Link>
+            {' | '}
+            <Link to={`/generator/${encodeURIComponent(JSON.stringify(JSON.parse(defaultApp)))}`}>Complex</Link>
             <div className='row'>
               <div className='col-xs-6'>
-              <Editor code={pretty(app)} setError={ setError } setCode={setCode }/>
+                <Route render={({ match })=> <Editor code={pretty(app)} setError={ setError } setCode={setCode } match={ match }/>} />
               <button disabled={ error.message } className='btn btn-primary vertical-margin' onClick={ generate }>Generate App</button>
               {
                 error.message && (
@@ -237,8 +266,8 @@
       return (
             <div>
               <ul className='nav nav-tabs vertical-margin'>
-                <li className={ isSelected('/') ? 'active' : '' }>
-                  <Link to='/'>Home</Link>
+                <li className={ isSelected('/home') ? 'active' : '' }>
+                  <Link to='/home'>Home</Link>
                 </li>
                 <li className={ isSelected('/generator', true) ? 'active' : '' }>
                   <Link to='/generator'>Generator</Link>
@@ -252,10 +281,12 @@
       return (
         <Router>
           <div className='container'>
+            <h1>React/Redux Code Generator</h1>
             <Route component={ Nav }  />
             <Switch>
-              <Route path='/' exact component={ Home } />
+              <Route exact path='/home' exact component={ Home } />
               <Route path='/generator/:app?' component={ Generator } />
+              <Redirect to='/generator' />
             </Switch>
           </div>
         </Router>

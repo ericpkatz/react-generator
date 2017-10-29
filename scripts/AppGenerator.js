@@ -39,6 +39,7 @@ class AppGenerator{
     `;
   }
   static Component(model){
+    model.attr = model.attr || [];
     const pluralized = pluralize(model.name); 
     return `
       ${AppGenerator.Comment( `SET UP COMPONENT ${pluralized}` )}
@@ -263,6 +264,9 @@ iframe.attr(
 "src", "data:text/html;charset=utf-8," + 
 html
 );
-    hljs.initHighlightingOnLoad();
+      $('pre code').each(function(i, block) {
+    hljs.highlightBlock(block);
+  });
+    //hljs.highlightBlock($('#codePreview')[0]);
   }
 }
