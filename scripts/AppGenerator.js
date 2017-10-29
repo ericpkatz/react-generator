@@ -38,6 +38,18 @@ class AppGenerator{
           <div className='well'>
             ${ pluralize(model.name) }
             ({ ${ pluralize(model.name) }.length}) 
+            {
+              ${pluralize(model.name)}.map( (item, idx) => {
+                
+                return (
+                  <li key={ idx }>
+                    ${ model.attr.map( att => {
+                      return `{item.${att.name}}`;
+                    }).join(' ')}
+                  </li>
+                );
+              })
+            }
           </div>
         );
       };

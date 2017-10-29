@@ -39,6 +39,12 @@
     {
       "name": "User",
       "fetchOnMount": true,
+      "attr": [
+        {
+          "name": "name", 
+          "type": "string"
+        }
+      ],
       "initialData": [
         {
           "id": 1,
@@ -52,6 +58,12 @@
     },
     {
       "name": "Thing",
+      "attr": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
       "initialData": [
         {
           "id": 1,
@@ -101,6 +113,12 @@
         this.state = { app , error: {} };
         this.generate = this.generate.bind(this);
         this.onChange = this.onChange.bind(this);
+        this.onKeyDown = this.onKeyDown.bind(this);
+      }
+      onKeyDown(ev){
+        if(ev.keyCode === 13){
+          ev.stopPropagation();
+        }
       }
       onChange(ev){
         this.setState({ app: ev.target.value });
@@ -120,7 +138,7 @@
         this.props.history.push(`/generator/${appParam}`);
       }
       render(){
-        const { generate, onChange } = this;
+        const { generate, onChange, onKeyDown } = this;
         const { app, error } = this.state;
         const pretty = (str)=> {
           try{
@@ -133,7 +151,7 @@
         return (
           <div>
           <div className='well'>
-            <textarea rows='10' className='form-control' onChange={ onChange } value={ pretty(app) }>
+            <textarea rows='10' className='form-control' onChange={ onChange } value={ pretty(app) } onKeyDown={ onKeyDown }>
             </textarea>
             <button disabled={ error.message } className='btn btn-primary vertical-margin' onClick={ generate }>Generate App</button>
             {
