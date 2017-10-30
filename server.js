@@ -7,6 +7,7 @@ const app = express();
 
 app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
 app.use('/css', express.static(path.join(__dirname, 'css')));
+app.use(require('body-parser').json());
 
 //if running locally you can have a file with your 'secrets'
 //if you are deployed- set environmental variables

@@ -264,6 +264,7 @@ iframe.attr(
 "src", "data:text/html;charset=utf-8," + 
 html
 );
+    window._html = html;
       $('pre code').each(function(i, block) {
     hljs.highlightBlock(block);
   });

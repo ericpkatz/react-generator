@@ -45,6 +45,38 @@ module.exports = (app, config, JWT_SECRET) => {
       .catch(next);
   });
 
+  app.post('/api/github/:token', (req, res, next)=> {
+    const token = jwt.decode(req.params.token, JWT_SECRET); 
+    models.User.findById(token.id)
+      .then( user => {
+        var gh = new GithubApi({ debug: true });
+        gh.authenticate({
+          token: user.githubAccessToken,
+          type: 'oauth'
+        });
+        console.log(gh);
+        gh.gists.create({
+          "description":"React Generated App",
+          "public":"true",
+          "files":{
+            "index.html":{
+              "content": req.body.html
+            }
+          }
+        })
+        .then( result=> {
+          res.send(result);
+        })
+        .catch((er)=> res.send(er));
+        /*
+        gh.repos.getAll({affiliation: 'owner'})
+          .then( repos => res.send(repos))
+          .catch( err => next(err));
+        */
+      }) 
+      .catch(next);
+  });
+
   //passport will take care of authentication
   app.get('/login/github', passport.authenticate('github', {
     session: false

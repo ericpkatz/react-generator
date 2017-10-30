@@ -53,6 +53,15 @@ if(document.location.search.indexOf('token=') === 1){
       return state;
     }
 
+    const gistReducer = (state={}, action) =>{
+      switch(action.type){
+        case 'SET_GIST':
+          state = action.data;
+          break;
+      }
+      return state;
+    }
+
     const fetchUser = ()=> {
       const token = window.localStorage.getItem('token');
       return (dispatch)=> {
@@ -65,9 +74,33 @@ if(document.location.search.indexOf('token=') === 1){
           });
       }
     }
+
+    const signOut = ()=> {
+      return (dispatch)=> {
+      window.localStorage.removeItem('token');
+        dispatch({
+          type: 'SET_USER',
+          data: {}
+        });
+      }
+    }
+
+    const createGist = ()=> {
+      const token = window.localStorage.getItem('token');
+      return (dispatch)=> {
+        return axios.post(`/api/github/${token}`, { html: window._html})
+          .then((response)=> {
+            dispatch({
+              type: 'SET_GIST',
+              data: response.data.data
+            });
+          });
+      }
+    }
     
     const reducer = combineReducers({
-      user: userReducer
+      user: userReducer,
+      gist: gistReducer
     });
 
     const store = createStore(reducer, 
@@ -75,10 +108,6 @@ if(document.location.search.indexOf('token=') === 1){
       applyMiddleware(ReduxThunk.default)
     );
     
-    store.subscribe(()=> {
-      console.log(store.getState());
-    });
-
 
     const Home = ()=> {
       return (
@@ -203,14 +232,11 @@ if(document.location.search.indexOf('token=') === 1){
       const code = JSON.stringify(JSON.parse(str), null, 2);
       editor.setValue(code);
       editor.on('change', ()=> {
-      console.log('change');
         try{
-          //this.props.setCode(editor.getValue());
           JSON.parse(editor.getValue());
           this.props.setError({});
         }
         catch(ex){
-          console.log(this.editor.getSession().getAnnotations());
           this.props.setError({
             message: 'error'
           });
@@ -241,7 +267,7 @@ if(document.location.search.indexOf('token=') === 1){
 
    const defaultUrl = `/generator/${encodeURIComponent(JSON.stringify(JSON.parse(defaultApp)))}`;
 
-    class Generator extends Component {
+    class _Generator extends Component {
       constructor(props){
         super();
         let app = defaultApp;
@@ -262,12 +288,12 @@ if(document.location.search.indexOf('token=') === 1){
       }
       generate(){
         const appParam = encodeURIComponent(JSON.stringify(JSON.parse(window.editor.getValue())));
-        console.log('GET CODE FROM EDITOR');
         this.props.history.push(`/generator/${appParam}`);
       }
       render(){
         const { generate, setError } = this;
         const { app, error } = this.state;
+        const { user, gist, createGist } = this.props;
         const pretty = (str)=> {
           try{
             return JSON.stringify(JSON.parse(str), null, 2);
@@ -285,9 +311,23 @@ if(document.location.search.indexOf('token=') === 1){
               <div className='col-xs-6'>
                 <Route render={({ match })=> <Editor setError={ setError } match={ match }/>} />
               <button disabled={ error.message } className='btn btn-primary vertical-margin' onClick={ generate }>Generate App</button>
+              { ' ' }
+              {
+                !!user.id && !error.message && (
+                  <button className='btn btn-success vertical-margin' onClick={ createGist }>Create Gist</button>
+
+                )
+              }
               {
                 error.message && (
                   <div className='alert alert-danger'>{ error.message }</div>
+                )
+              }
+              {
+                !!gist.url && (
+                  <div className='alert alert-success'>
+                    Find your gist <a href={ gist.url } target='_blank'>here.</a>
+                  </div>
                 )
               }
               </div>
@@ -309,7 +349,20 @@ if(document.location.search.indexOf('token=') === 1){
       }
     }
 
-    const _Nav = ({ location, user })=> {
+    const Generator = connect(({ user, gist })=> {
+      return {
+        user,
+        gist
+      };
+      }, (dispatch)=> {
+        return {
+          createGist: ()=> {
+            return dispatch(createGist());
+          }
+        }
+      })(_Generator);
+
+    const _Nav = ({ location, user, signOut })=> {
       const isSelected = (pathname, startsWith)=> {
         return location.pathname === pathname || ( startsWith && location.pathname.indexOf(pathname) === 0);
       }
@@ -326,9 +379,12 @@ if(document.location.search.indexOf('token=') === 1){
               <div className='well'>
               {
                 !!user.id && (
-                  <label className='label label-success'>
-                    Logged In Through Github
-                  </label>
+                  <div>
+                    <label className='label label-success'>
+                      Logged In Through Github
+                    </label>
+                    <button className='btn btn-default' onClick={ signOut }>Sign Out</button>
+                  </div>
                 ) 
               }
               {
@@ -344,11 +400,16 @@ if(document.location.search.indexOf('token=') === 1){
     }
 
     const Nav = connect(({ user })=> {
-      console.log(user);
       return {
         user
       }
-    })(_Nav);
+      }, (dispatch)=> {
+        return {
+          signOut: ()=> {
+            return dispatch(signOut());
+          }
+        };
+      })(_Nav);
 
     class _Routes extends Component{
       componentDidMount(){
