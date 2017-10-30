@@ -309,7 +309,6 @@ if(document.location.search.indexOf('token=') === 1){
     }
 
     const _Nav = ({ location, user })=> {
-      console.log('USER', user);
       const isSelected = (pathname, startsWith)=> {
         return location.pathname === pathname || ( startsWith && location.pathname.indexOf(pathname) === 0);
       }
@@ -323,6 +322,22 @@ if(document.location.search.indexOf('token=') === 1){
                   <Link to='/generator'>Generator</Link>
                 </li>
               </ul>
+              <div className='well'>
+              {
+                !!user.id && (
+                  <label className='label label-success'>
+                    Logged In Through Github
+                  </label>
+                ) 
+              }
+              {
+                !user.id && (
+                  <a className='btn btn-primary' href='/login/github'>
+                    Log in Through Github
+                  </a>
+                ) 
+              }
+              </div>
             </div>
       );
     }
