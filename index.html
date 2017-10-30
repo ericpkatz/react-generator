@@ -9,10 +9,15 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/react-router-dom/4.2.2/react-router-dom.min.js'></script>
     <script src='/scripts/AppGenerator.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/pluralize/7.0.0/pluralize.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.0/axios.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js'></script>
 <link rel="stylesheet"
       href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/redux/3.7.2/redux.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/react-redux/5.0.6/react-redux.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/2.2.0/redux-thunk.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/redux-logger@3.0.6/dist/redux-logger.min.js'></script>
     <link href='/css/bootstrap.css' rel='stylesheet' />
 <style>
   .vertical-margin {
@@ -23,12 +28,56 @@
   <body>
     <div id='root'></div>
   </body>
+  <script>
+if(document.location.search.indexOf('token=') === 1){
+  const token = document.location.search.slice(1).split('&')[0].split('token=')[1];
+  window.localStorage.setItem('token', token);
+  window.location = '/';
+}
+  </script>
 
   <script type='text/babel'>
     const { Component } = React;
     const { render } = ReactDOM;
     const { HashRouter, Route, Switch, Link, Redirect } = ReactRouterDOM; 
     const Router = HashRouter;
+    const { Provider, connect } = ReactRedux;
+    const { applyMiddleware, createStore, combineReducers } = Redux;
+
+    const userReducer = (state={}, action) =>{
+      switch(action.type){
+        case 'SET_USER':
+          state = action.data;
+          break;
+      }
+      return state;
+    }
+
+    const fetchUser = ()=> {
+      const token = window.localStorage.getItem('token');
+      return (dispatch)=> {
+        return axios.get(`/api/session/${token}`)
+          .then((response)=> {
+            dispatch({
+              type: 'SET_USER',
+              data: response.data
+            });
+          });
+      }
+    }
+    
+    const reducer = combineReducers({
+      user: userReducer
+    });
+
+    const store = createStore(reducer, 
+      applyMiddleware(reduxLogger.createLogger()),
+      applyMiddleware(ReduxThunk.default)
+    );
+    
+    store.subscribe(()=> {
+      console.log(store.getState());
+    });
 
 
     const Home = ()=> {
@@ -259,7 +308,8 @@
       }
     }
 
-    const Nav = ({ location })=> {
+    const _Nav = ({ location, user })=> {
+      console.log('USER', user);
       const isSelected = (pathname, startsWith)=> {
         return location.pathname === pathname || ( startsWith && location.pathname.indexOf(pathname) === 0);
       }
@@ -276,20 +326,48 @@
             </div>
       );
     }
+
+    const Nav = connect(({ user })=> {
+      console.log(user);
+      return {
+        user
+      }
+    })(_Nav);
+
+    class _Routes extends Component{
+      componentDidMount(){
+        this.props.fetchUser();
+      }
+      render(){
+        return (
+            <Router>
+              <div className='container'>
+                <h1>React/Redux Code Generator</h1>
+                <Route component={ Nav }  />
+                <Switch>
+                  <Route exact path='/home' exact component={ Home } />
+                  <Route path='/generator/:app?' component={ Generator } />
+                  <Redirect to='/generator' />
+                </Switch>
+              </div>
+            </Router>
+        );
+      }
+    }
+
+    const Routes = connect(null, (dispatch)=> {
+      return {
+        fetchUser: ()=> {
+          return dispatch(fetchUser());
+        }
+      }
+    })(_Routes);
     
     const App = ()=> {
       return (
-        <Router>
-          <div className='container'>
-            <h1>React/Redux Code Generator</h1>
-            <Route component={ Nav }  />
-            <Switch>
-              <Route exact path='/home' exact component={ Home } />
-              <Route path='/generator/:app?' component={ Generator } />
-              <Redirect to='/generator' />
-            </Switch>
-          </div>
-        </Router>
+      <Provider store = { store }>
+        <Routes />
+      </Provider>
       );
     }
     render(<App />, document.getElementById('root'));
