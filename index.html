@@ -197,8 +197,11 @@ if(document.location.search.indexOf('token=') === 1){
       var editor = ace.edit("editor");
       this.editor = editor;
       window.editor = this.editor;
-      editor.setTheme("ace/theme/monokai");
+      editor.setTheme("ace/theme/chrome");
       editor.getSession().setMode("ace/mode/json");
+      const str = decodeURIComponent(this.props.match.params.app);
+      const code = JSON.stringify(JSON.parse(str), null, 2);
+      editor.setValue(code);
       editor.on('change', ()=> {
       console.log('change');
         try{
@@ -215,12 +218,9 @@ if(document.location.search.indexOf('token=') === 1){
       });
     }
     componentWillReceiveProps(props){
-      const str = decodeURIComponent(props.match.params.app);
-      const code = JSON.stringify(JSON.parse(str), null, 2);
-      if(props.code === code){
-        return;
-      }
-      if(this.editor.getValue() !== code){
+      if(props.match.params.app !== this.props.match.params.app){
+        const str = decodeURIComponent(props.match.params.app);
+        const code = JSON.stringify(JSON.parse(str), null, 2);
         this.editor.setValue(code);
       }
     }
@@ -228,17 +228,18 @@ if(document.location.search.indexOf('token=') === 1){
       return false;
     }
     render(){
-      const { code } = this.props;
       return (
         <div>
           <h2>Your Configuration</h2>
           <div id='editor' style={{ height: '400px'}}>
-            { code }
           </div>
         </div>
       );
     }
    }
+
+
+   const defaultUrl = `/generator/${encodeURIComponent(JSON.stringify(JSON.parse(defaultApp)))}`;
 
     class Generator extends Component {
       constructor(props){
@@ -252,13 +253,9 @@ if(document.location.search.indexOf('token=') === 1){
         this.state = { app , error: {} };
         this.generate = this.generate.bind(this);
         this.setError = this.setError.bind(this);
-        this.setCode = this.setCode.bind(this);
       }
       setError(error){
         this.setState({ error });
-      }
-      setCode(code){
-        this.setState({ app: code });
       }
       componentWillReceiveProps(props){
         AppGenerator.generate(props.match.params.app);
@@ -269,7 +266,7 @@ if(document.location.search.indexOf('token=') === 1){
         this.props.history.push(`/generator/${appParam}`);
       }
       render(){
-        const { generate, setError, setCode } = this;
+        const { generate, setError } = this;
         const { app, error } = this.state;
         const pretty = (str)=> {
           try{
@@ -286,7 +283,7 @@ if(document.location.search.indexOf('token=') === 1){
             <Link to={`/generator/${encodeURIComponent(JSON.stringify(JSON.parse(defaultApp)))}`}>Complex</Link>
             <div className='row'>
               <div className='col-xs-6'>
-                <Route render={({ match })=> <Editor code={pretty(app)} setError={ setError } setCode={setCode } match={ match }/>} />
+                <Route render={({ match })=> <Editor setError={ setError } match={ match }/>} />
               <button disabled={ error.message } className='btn btn-primary vertical-margin' onClick={ generate }>Generate App</button>
               {
                 error.message && (
@@ -296,9 +293,7 @@ if(document.location.search.indexOf('token=') === 1){
               </div>
               <div className='col-xs-6'>
               {
-                !error.message && (
-                  <GeneratedApp app={ app }/>
-                )
+                <GeneratedApp app={ app }/>
               }
               </div>
             </div>
@@ -325,7 +320,7 @@ if(document.location.search.indexOf('token=') === 1){
                   <Link to='/home'>Home</Link>
                 </li>
                 <li className={ isSelected('/generator', true) ? 'active' : '' }>
-                  <Link to='/generator'>Generator</Link>
+                  <Link to={ defaultUrl }>Generator</Link>
                 </li>
               </ul>
               <div className='well'>
@@ -368,7 +363,7 @@ if(document.location.search.indexOf('token=') === 1){
                 <Switch>
                   <Route exact path='/home' exact component={ Home } />
                   <Route path='/generator/:app?' component={ Generator } />
-                  <Redirect to='/generator' />
+                  <Redirect to={ defaultUrl } />
                 </Switch>
               </div>
             </Router>
