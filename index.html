@@ -196,16 +196,18 @@ if(document.location.search.indexOf('token=') === 1){
     componentDidMount(){
       var editor = ace.edit("editor");
       this.editor = editor;
+      window.editor = this.editor;
       editor.setTheme("ace/theme/monokai");
       editor.getSession().setMode("ace/mode/json");
       editor.on('change', ()=> {
       console.log('change');
         try{
-          this.props.setCode(editor.getValue());
+          //this.props.setCode(editor.getValue());
           JSON.parse(editor.getValue());
           this.props.setError({});
         }
         catch(ex){
+          console.log(this.editor.getSession().getAnnotations());
           this.props.setError({
             message: 'error'
           });
@@ -215,6 +217,9 @@ if(document.location.search.indexOf('token=') === 1){
     componentWillReceiveProps(props){
       const str = decodeURIComponent(props.match.params.app);
       const code = JSON.stringify(JSON.parse(str), null, 2);
+      if(props.code === code){
+        return;
+      }
       if(this.editor.getValue() !== code){
         this.editor.setValue(code);
       }
@@ -259,7 +264,8 @@ if(document.location.search.indexOf('token=') === 1){
         AppGenerator.generate(props.match.params.app);
       }
       generate(){
-        const appParam = encodeURIComponent(JSON.stringify(JSON.parse(this.state.app)));
+        const appParam = encodeURIComponent(JSON.stringify(JSON.parse(window.editor.getValue())));
+        console.log('GET CODE FROM EDITOR');
         this.props.history.push(`/generator/${appParam}`);
       }
       render(){
