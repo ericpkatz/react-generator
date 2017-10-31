@@ -134,33 +134,14 @@ if(document.location.search.indexOf('token=') === 1){
     }
 
     const defaultApp = `{
-  "name": "greatest app ever!",
+  "name": "Acme Products!",
   "models": [
     {
-      "name": "User",
+      "name": "Product",
       "fetchOnMount": true,
       "attr": [
         {
           "name": "name", 
-          "type": "string"
-        }
-      ],
-      "initialData": [
-        {
-          "id": 1,
-          "name": "moe"
-        },
-        {
-          "id": 2,
-          "name": "larry"
-        }
-      ]
-    },
-    {
-      "name": "Thing",
-      "attr": [
-        {
-          "name": "name",
           "type": "string"
         }
       ],
@@ -172,6 +153,31 @@ if(document.location.search.indexOf('token=') === 1){
         {
           "id": 2,
           "name": "bar"
+        },
+        {
+          "id": 3,
+          "name": "bazz"
+        }
+
+      ]
+    },
+    {
+      "name": "User",
+      "fetchOnMount": true,
+      "attr": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "initialData": [
+        {
+          "id": 1,
+          "name": "moe"
+        },
+        {
+          "id": 2,
+          "name": "larry"
         }
       ]
     }
@@ -332,6 +338,8 @@ if(document.location.search.indexOf('token=') === 1){
                 !!gist.url && (
                   <div className='alert alert-success'>
                     Find your gist <a href={ url } target='_blank'>here.</a>
+                    
+                    Open in jsbin <a href={ url.replace('github', 'jsbin') } target='_blank'>here.</a>
                   </div>
                 )
               }
