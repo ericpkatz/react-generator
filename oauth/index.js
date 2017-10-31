@@ -4,6 +4,7 @@ module.exports = (app, config, JWT_SECRET)=> {
   const OAUTH_PROVIDERS = ['GOOGLE', 'GITHUB', 'FACEBOOK'];
   const oauthProviderMap = {};
   let configured = false;
+  console.log('configure auth providers');
 
   OAUTH_PROVIDERS.forEach( name => {
     const secret = config[`${name}_OAUTH_SECRET`];
