@@ -19,6 +19,7 @@ module.exports = (app, config, JWT_SECRET)=> {
           callbackURL: process.env[`${name}_CALLBACK_URL`],
         };
       const scope = process.env[`${name}_SCOPE`];
+      console.log('SCOPE', scope);
       if(scope){
         CONFIG.scope = JSON.parse(scope);
       }
