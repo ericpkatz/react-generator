@@ -1,5 +1,6 @@
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>React Redux Generator</title>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"></script>
@@ -294,6 +295,10 @@ if(document.location.search.indexOf('token=') === 1){
         const { generate, setError } = this;
         const { app, error } = this.state;
         const { user, gist, createGist } = this.props;
+        let url;
+        if(gist.url){
+          url = `https://gist.github.com/${gist.id}`;
+        }
         const pretty = (str)=> {
           try{
             return JSON.stringify(JSON.parse(str), null, 2);
@@ -308,7 +313,7 @@ if(document.location.search.indexOf('token=') === 1){
             {' | '}
             <Link to={`/generator/${encodeURIComponent(JSON.stringify(JSON.parse(defaultApp)))}`}>Complex</Link>
             <div className='row'>
-              <div className='col-xs-6'>
+              <div className='col-sm-6'>
                 <Route render={({ match })=> <Editor setError={ setError } match={ match }/>} />
               <button disabled={ error.message } className='btn btn-primary vertical-margin' onClick={ generate }>Generate App</button>
               { ' ' }
@@ -326,12 +331,12 @@ if(document.location.search.indexOf('token=') === 1){
               {
                 !!gist.url && (
                   <div className='alert alert-success'>
-                    Find your gist <a href={ gist.url } target='_blank'>here.</a>
+                    Find your gist <a href={ url } target='_blank'>here.</a>
                   </div>
                 )
               }
               </div>
-              <div className='col-xs-6'>
+              <div className='col-sm-6'>
               {
                 <GeneratedApp app={ app }/>
               }
