@@ -21,6 +21,7 @@ module.exports = (app, config, JWT_SECRET)=> {
       if(scope){
         CONFIG.scope = JSON.parse(scope);
       }
+      console.log(CONFIG);
       require(`./oauth-${name.toLowerCase()}`)(app, CONFIG, JWT_SECRET); 
     }
     oauthProviderMap[`${name}_OAUTH`] = !!secret;
