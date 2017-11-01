@@ -167,7 +167,7 @@ class AppGenerator{
                 </li>
               ) : (
                 <li>
-                  <a>Login</a>
+                  <Link to='/login'>Login</Link>
                 </li>
               )
             }
@@ -237,10 +237,11 @@ class AppGenerator{
     const Router = HashRouter;
     const { Provider, connect } = ReactRedux;
 
-    const { createStore, combineReducers, applyMiddleware } = Redux;
-    const { createLogger } = reduxLogger;
 
     ${AppGenerator.Comment( 'SET UP STORE' )}
+
+    const { createStore, combineReducers, applyMiddleware } = Redux;
+    const { createLogger } = reduxLogger;
 
     const store = createStore(combineReducers(
       ${ AppGenerator.reducers(models) }
