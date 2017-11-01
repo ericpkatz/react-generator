@@ -259,12 +259,10 @@ class AppGenerator{
   </${script}>
 </html>
     `;
-const preview = html.replace(/</g, "&lt;");
-$('#codePreview').html(preview);
-iframe.attr(
-"src", "data:text/html;charset=utf-8," + 
-html
-);
+
+    const preview = html.replace(/</g, "&lt;");
+    $('#codePreview').html(preview);
+    iframe.attr("src", `data:text/html;charset=utf-8,${html}`);
     window._html = html;
       $('pre code').each(function(i, block) {
     hljs.highlightBlock(block);
