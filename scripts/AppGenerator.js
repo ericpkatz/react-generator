@@ -30,6 +30,7 @@ class AppGenerator{
       }
       return memo;
     }, []);
+    injectedState.push('user');
     return `
     const mapStateToProps = ({ ${ injectedState.join(', ')} })=> {
       return {
@@ -114,6 +115,7 @@ class AppGenerator{
       }
       return memo;
     }, []);
+    injectedState.push('user={ this.props.user }');
     return `
       <Route component={ Title } />
       <Route render={ ({ location } )=> <Nav location={ location } ${ injectedState.join(' ') }/> } />
@@ -128,12 +130,14 @@ class AppGenerator{
       }
       return memo;
     }, []);
+    injectedState.push('user');
     return `
       const Nav = ({ location, ${injectedState.join(', ')} })=> {
           const isSelected = (pathname, startsWith)=> {
             return pathname === location.pathname || ( startsWith && location.pathname.indexOf(pathname) === 0 );
 
           };
+          const isLoggedIn = !!user.id;
           return ( 
           <ul style={{ marginBottom: '10px'}} className='nav nav-tabs'>
             <li className={ isSelected('/') ? 'active' : '' }>
@@ -156,6 +160,17 @@ class AppGenerator{
                 `
               );
             }).join('')}
+            {
+              isLoggedIn ? (
+                <li>
+                  <a>Logout</a>
+                </li>
+              ) : (
+                <li>
+                  <a>Login</a>
+                </li>
+              )
+            }
           </ul>
         );
       };
@@ -163,6 +178,14 @@ class AppGenerator{
   }
   static reducers(models){
     return `{
+      user: (state={}, action)=> {
+        switch(action.type){
+          case 'SET_USER': ()=> {
+            state = data.user;
+          }
+        }
+        return state;
+      },
       ${ models.map( model => {
         return `
           ${pluralize(model.name)}: (state = [], action)=> {
