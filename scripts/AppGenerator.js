@@ -139,7 +139,8 @@ class AppGenerator{
           };
           const isLoggedIn = !!user.id;
           return ( 
-          <ul style={{ marginBottom: '10px'}} className='nav nav-tabs'>
+          <div style={{ marginBottom: '10px'}}>
+          <ul className='nav nav-tabs' style={{ marginBottom: '10px'}}>
             <li className={ isSelected('/') ? 'active' : '' }>
               <Link to='/'>Home</Link>
             </li>
@@ -172,6 +173,10 @@ class AppGenerator{
               )
             }
           </ul>
+          <div className='label label-default'>
+              pathname: <em>{ location.pathname }</em>
+          </div>
+          </div>
         );
       };
       const Nav = connect(null, (dispatch)=> {
