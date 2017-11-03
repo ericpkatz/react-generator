@@ -132,7 +132,7 @@ class AppGenerator{
     }, []);
     injectedState.push('user');
     return `
-      const Nav = ({ location, ${injectedState.join(', ')} })=> {
+      const _Nav = ({ location, attemptLogin, logout, ${injectedState.join(', ')} })=> {
           const isSelected = (pathname, startsWith)=> {
             return pathname === location.pathname || ( startsWith && location.pathname.indexOf(pathname) === 0 );
 
@@ -163,25 +163,36 @@ class AppGenerator{
             {
               isLoggedIn ? (
                 <li>
-                  <a>Logout</a>
+                  <a onClick={ logout }>Logout</a>
                 </li>
               ) : (
                 <li>
-                  <Link to='/login'>Login</Link>
+                  <a onClick={()=> attemptLogin({ username: 'MOE', id: 1})}>Login</a>
                 </li>
               )
             }
           </ul>
         );
       };
+      const Nav = connect(null, (dispatch)=> {
+        return {
+          attemptLogin: (credentials)=> {
+            return dispatch(attemptLogin(credentials));
+          },
+          logout: ()=> {
+            dispatch(setUser({}));
+          }
+        };
+      })(_Nav);
     `;
   }
   static reducers(models){
     return `{
       user: (state={}, action)=> {
         switch(action.type){
-          case 'SET_USER': ()=> {
-            state = data.user;
+          case 'SET_USER': {
+            console.log(action);
+            state = action.data;
           }
         }
         return state;
@@ -246,6 +257,19 @@ class AppGenerator{
     const store = createStore(combineReducers(
       ${ AppGenerator.reducers(models) }
     ), applyMiddleware(createLogger({})), applyMiddleware(ReduxThunk.default));
+
+    const attemptLogin = (credentials)=> {
+      return (dispatch)=> {
+        return dispatch(setUser(credentials));
+      }
+    };
+
+    const setUser = (credentials)=> {
+      return {
+          type: 'SET_USER',
+          data: credentials
+      };
+    };
 
     ${AppGenerator.Comment( 'SET UP NAV' )}
     ${AppGenerator.Nav( models )}
