@@ -164,11 +164,11 @@ class AppGenerator{
             {
               isLoggedIn ? (
                 <li>
-                  <a onClick={ logout }>Logout</a>
+                  <a onClick={ logout }>Logout ( { user.username } )</a>
                 </li>
               ) : (
                 <li>
-                  <a onClick={()=> attemptLogin({ username: 'MOE', id: 1})}>Login</a>
+                  <a onClick={()=> attemptLogin({ username: 'Moe', password: 'moe', id: 1 })}>Login</a>
                 </li>
               )
             }
@@ -229,6 +229,7 @@ class AppGenerator{
 <${script} src='https://cdnjs.cloudflare.com/ajax/libs/react-redux/5.0.6/react-redux.js'></${script}>
 <${script} src='https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/2.2.0/redux-thunk.js'></${script}>
 <${script} src='https://cdn.jsdelivr.net/npm/redux-logger@3.0.6/dist/redux-logger.min.js'></${script}>
+<${script} src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.0/axios.js'></${script}>
 <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' />
 `;
 
@@ -236,6 +237,7 @@ class AppGenerator{
   static generate(str){
     const script = 'script';
     const app = JSON.parse(decodeURIComponent(str));
+    app.api = app.api || 'http://localhost:3003';
     const { name, models } = app;
     const iframe = $('#appFrame');
     const html = `
@@ -265,6 +267,12 @@ class AppGenerator{
 
     const attemptLogin = (credentials)=> {
       return (dispatch)=> {
+        /* uncomment to use api
+        axios.post('${app.api}/api/tokens', credentials)
+          .then( result => result.data.token)
+          .then( token => axios.get('http://localhost:3003/api/me', { headers: { auth: token}}))
+          .then( result => dispatch(setUser(result.data)));
+        */
         return dispatch(setUser(credentials));
       }
     };
