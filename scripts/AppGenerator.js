@@ -1,4 +1,7 @@
 class AppGenerator{
+  static CamelCase(str){
+    return `${str.slice(0,1).toLowerCase()}${str.slice(1)}`;
+  }
   static Dispatch(models){
     return `
     const mapDispatchToProps = (dispatch)=> {
@@ -25,9 +28,7 @@ class AppGenerator{
   }
   static State(models){
     const injectedState = models.reduce((memo, model)=> {
-      if(model.fetchOnMount){
-        memo.push(pluralize(model.name));
-      }
+      memo.push(AppGenerator.CamelCase(pluralize(model.name)));
       return memo;
     }, []);
     injectedState.push('user');
@@ -44,13 +45,13 @@ class AppGenerator{
     const pluralized = pluralize(model.name); 
     return `
       ${AppGenerator.Comment( `SET UP COMPONENT ${pluralized}` )}
-      const _${pluralize(model.name)} = ({${ pluralize(model.name) }}) => {
+      const _${pluralize(model.name)} = ({${ AppGenerator.CamelCase(pluralize(model.name)) }}) => {
         return (
           <div className='well'>
             ${ pluralize(model.name) }
             ({ ${ pluralize(model.name) }.length}) 
             {
-              ${pluralize(model.name)}.map( (item, idx) => {
+              ${AppGenerator.CamelCase(pluralize(model.name))}.map( (item, idx) => {
                 
                 return (
                   <li key={ idx }>
@@ -64,12 +65,12 @@ class AppGenerator{
           </div>
         );
       };
-      const ${pluralize(model.name)}Mapper = ({${pluralize(model.name)}})=> {
+      const ${AppGenerator.CamelCase(pluralize(model.name))}Mapper = ({${AppGenerator.CamelCase(pluralize(model.name))}})=> {
         return {
-          ${pluralize(model.name)}
+          ${AppGenerator.CamelCase(pluralize(model.name))}
         };
       };
-      const ${pluralize(model.name)} = connect(${pluralize(model.name)}Mapper)(_${pluralize(model.name)}); 
+      const ${pluralize(model.name)} = connect(${AppGenerator.CamelCase(pluralize(model.name))}Mapper)(_${pluralize(model.name)}); 
 
       ${AppGenerator.Comment( `Action Creator for ${pluralized}` )}
       const fetch${pluralize(model.name)} = ()=> {
@@ -105,14 +106,12 @@ class AppGenerator{
   }
   static Route(model){
     return `
-      <Route path='/${pluralize(model.name)}' component={${ pluralize(model.name) }} />`;
+      <Route path='/${AppGenerator.CamelCase(pluralize(model.name))}' component={${ pluralize(model.name) }} />`;
   }
   static Routes(models){
     const injectedState = models.reduce((memo, model)=> {
       const pluralizedModel = pluralize(model.name); 
-      if(model.fetchOnMount){
-        memo.push(`${pluralizedModel}={this.props.${ pluralizedModel }}`);
-      }
+        memo.push(`${AppGenerator.CamelCase(pluralizedModel)}={this.props.${ AppGenerator.CamelCase(pluralizedModel) }}`);
       return memo;
     }, []);
     injectedState.push('user={ this.props.user }');
@@ -125,9 +124,7 @@ class AppGenerator{
   static Nav(models){
     const injectedState = models.reduce((memo, model)=> {
       const pluralizedModel = pluralize(model.name); 
-      if(model.fetchOnMount){
-        memo.push(pluralizedModel);
-      }
+      memo.push(AppGenerator.CamelCase(pluralizedModel));
       return memo;
     }, []);
     injectedState.push('user');
@@ -148,12 +145,12 @@ class AppGenerator{
               const pluralized = pluralize(model.name);
               return (
                 `
-                <li className={ isSelected('/${ pluralize( model.name )}', true) ? 'active' : '' }>
-                    <Link to='/${ pluralize(model.name) }'>
+                <li className={ isSelected('/${ AppGenerator.CamelCase(pluralize( model.name ))}', true) ? 'active' : '' }>
+                    <Link to='/${ AppGenerator.CamelCase(pluralize(model.name)) }'>
                       ${ pluralized }
                       {
-                        Array.isArray(${ pluralized }) && (
-                          <span className='badge'>{ ${ pluralized}.length }</span>
+                        ${ AppGenerator.CamelCase(pluralized) } && (
+                          <span className='badge'>{ ${ AppGenerator.CamelCase(pluralized)}.length }</span>
                         ) 
                       }
                     </Link>
@@ -204,7 +201,7 @@ class AppGenerator{
       },
       ${ models.map( model => {
         return `
-          ${pluralize(model.name)}: (state = [], action)=> {
+          ${AppGenerator.CamelCase(pluralize(model.name))}: (state = [], action)=> {
             switch(action.type){
               case 'SET_${pluralize(model.name)}':
                 state = action.data;
