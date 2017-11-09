@@ -54,7 +54,8 @@ if(process.env.SEED){
   require('./db').sync();
 }
 
-app.listen(process.env.PORT || 3002);
+const port = process.env.PORT || 3002; 
+app.listen(port, ()=> console.log(`listening on ${port}`));
 
 
 

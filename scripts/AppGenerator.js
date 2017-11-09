@@ -193,7 +193,6 @@ class AppGenerator{
       user: (state={}, action)=> {
         switch(action.type){
           case 'SET_USER': {
-            console.log(action);
             state = action.data;
           }
         }
@@ -251,6 +250,7 @@ class AppGenerator{
     const { Component } = React;
     const Router = HashRouter;
     const { Provider, connect } = ReactRedux;
+    const BASE_URL = '${app.api}';
 
 
     ${AppGenerator.Comment( 'SET UP STORE' )}
@@ -265,9 +265,9 @@ class AppGenerator{
     const attemptLogin = (credentials)=> {
       return (dispatch)=> {
         /* uncomment to use api
-        axios.post('${app.api}/api/tokens', credentials)
+        axios.post(BASE_URL + "/api/tokens", credentials)
           .then( result => result.data.token)
-          .then( token => axios.get('http://localhost:3003/api/me', { headers: { auth: token}}))
+          .then( token => axios.get(BASE_URL + '/api/me', { headers: { auth: token}}))
           .then( result => dispatch(setUser(result.data)));
         */
         return dispatch(setUser(credentials));
