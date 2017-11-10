@@ -8,9 +8,7 @@ class AppGenerator{
       return {
         init: ()=> {
           ${ models.reduce( (memo, model) => {
-            if(model.fetchOnMount){
-              memo.push(`dispatch(fetch${pluralize(model.name)}());`);
-            }
+            memo.push(`dispatch(fetch${pluralize(model.name)}());`);
             return memo;
 
           }, []).join('') }
@@ -76,9 +74,18 @@ class AppGenerator{
       const fetch${pluralize(model.name)} = ()=> {
         return (dispatch)=> {
           ${AppGenerator.Comment(`Hook into API to load ${pluralized}` )}
+        /* uncomment to use api
+        axios.get(BASE_URL + "/api/${AppGenerator.CamelCase(pluralize(model.name))}")
+          .then( result => {
+            dispatch({
+              type: 'SET_${pluralize(model.name).toUpperCase()}',
+              data: result.data
+            });
+          });
+        */
           const data = ${ JSON.stringify( model.initialData )};
           dispatch({
-            type: 'SET_${pluralize(model.name)}',
+            type: 'SET_${pluralize(model.name).toUpperCase()}',
             data
           });
         };
@@ -202,7 +209,7 @@ class AppGenerator{
         return `
           ${AppGenerator.CamelCase(pluralize(model.name))}: (state = [], action)=> {
             switch(action.type){
-              case 'SET_${pluralize(model.name)}':
+              case 'SET_${pluralize(model.name).toUpperCase()}':
                 state = action.data;
                 break;
             }
