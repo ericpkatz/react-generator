@@ -113,22 +113,32 @@ if(document.location.search.indexOf('token=') === 1){
     const Home = ()=> {
       return (
         <div>
-        <div className='well'>
-          <h1>Tired of writing React Boilerplate??</h1>
-          Generate your React application with a simple configuration object!
-          <ul>
-            <li>
-              <h2>Connected components generated!</h2>
-            </li>
-            <li>
-              <h2>Redux stores and reducers generated!</h2>
-            </li>
-            <li>
-              <h2>Redux Thunk middlware included!</h2>
-            </li>
-          </ul>
-        </div>
-
+          <div className='well'>
+            <h1>The Easiest Way to Generate A React Application... ever!</h1>
+          </div>
+          <div>
+            <h2>Specify Configuration for Your App</h2>
+            <h3>Something simple</h3>
+            <div>
+<pre>{
+`{
+  "title" : "My App",
+  "models" : [
+    {
+      "name": "Foo"
+    }
+  ] 
+}
+`
+}</pre>
+            </div>
+            <h3>Or a little more complex</h3>
+            <div>
+<pre>{
+  defaultApp
+}</pre>
+            </div>
+          </div>
         </div>
       );
     }

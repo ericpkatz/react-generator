@@ -47,7 +47,7 @@ class AppGenerator{
         return (
           <div className='well'>
             ${ pluralize(model.name) }
-            ({ ${ pluralize(model.name) }.length}) 
+            ({ ${ AppGenerator.CamelCase(pluralize(model.name)) }.length}) 
             {
               ${AppGenerator.CamelCase(pluralize(model.name))}.map( (item, idx) => {
                 
@@ -83,7 +83,7 @@ class AppGenerator{
             });
           });
         */
-          const data = ${ JSON.stringify( model.initialData )};
+          const data = ${ model.initialData ? JSON.stringify( model.initialData ) : '[]'};
           dispatch({
             type: 'SET_${pluralize(model.name).toUpperCase()}',
             data
