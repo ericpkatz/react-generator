@@ -121,15 +121,7 @@ if(document.location.search.indexOf('token=') === 1){
             <h3>Something simple</h3>
             <div>
 <pre>{
-`{
-  "title" : "My App",
-  "models" : [
-    {
-      "name": "Foo"
-    }
-  ] 
-}
-`
+  simpleApp
 }</pre>
             </div>
             <h3>Or a little more complex</h3>
@@ -142,6 +134,15 @@ if(document.location.search.indexOf('token=') === 1){
         </div>
       );
     }
+
+    const simpleApp = `{
+      "name": "Simple App",
+      "models": [
+        {
+          "name": "Foo"
+        }
+      ]
+      }`;
 
     const defaultApp = `{
   "name": "Acme Products!",
@@ -323,7 +324,7 @@ if(document.location.search.indexOf('token=') === 1){
         }
         return (
           <div>
-            <Link to={`/generator/${encodeURIComponent(JSON.stringify({ name: 'Simple', models:[ { name: 'Foo' }]}))}`}>Simple</Link>
+            <Link to={`/generator/${encodeURIComponent(JSON.stringify(JSON.parse(simpleApp)))}`}>Simple</Link>
             {' | '}
             <Link to={`/generator/${encodeURIComponent(JSON.stringify(JSON.parse(defaultApp)))}`}>Complex</Link>
             <div className='row'>
