@@ -40,7 +40,7 @@ if(document.location.search.indexOf('token=') === 1){
   <script type='text/babel'>
     const { Component } = React;
     const { render } = ReactDOM;
-    const { HashRouter, Route, Switch, Link, Redirect } = ReactRouterDOM; 
+    const { HashRouter, Route, Switch, Link, Redirect } = ReactRouterDOM;
     const Router = HashRouter;
     const { Provider, connect } = ReactRedux;
     const { applyMiddleware, createStore, combineReducers } = Redux;
@@ -98,17 +98,17 @@ if(document.location.search.indexOf('token=') === 1){
           });
       }
     }
-    
+
     const reducer = combineReducers({
       user: userReducer,
       gist: gistReducer
     });
 
-    const store = createStore(reducer, 
+    const store = createStore(reducer,
       applyMiddleware(reduxLogger.createLogger()),
       applyMiddleware(ReduxThunk.default)
     );
-    
+
 
     const Home = ()=> {
       return (
@@ -116,6 +116,8 @@ if(document.location.search.indexOf('token=') === 1){
           <div className='well'>
             <h1>The Easiest Way to Generate A React Application... ever!</h1>
           </div>
+<div className='row'>
+      <div className='col-xs-6'>
           <div>
             <h2>Specify Configuration for Your App</h2>
             <h3>Something simple</h3>
@@ -131,18 +133,33 @@ if(document.location.search.indexOf('token=') === 1){
 }</pre>
             </div>
           </div>
+      </div>
+      <div className='col-xs-6'>
+        <h2>click generate to get...</h2>
+        <ul className='list-group'>
+          <li className='list-group-item'>A complete react-redux Application</li>
+          <li className='list-group-item'>Perfect for prototyping</li>
+          <li className='list-group-item'>All code in one single file so you could open it up in jsbin</li>
+          <li className='list-group-item'>Save your code as a Github gist</li>
+          <li className='list-group-item'>Uncomment some code to hit a real back-end api</li>
+          <li className='list-group-item'>All libraries served via CDNs. (No npm install)</li>
+          <li className='list-group-item'>A Redux Store with thunks and logging</li>
+          <li className='list-group-item'>React Router configured</li>
+        </ul>
+      </div>
+       </div>
         </div>
       );
     }
 
     const simpleApp = `{
-      "name": "Simple App",
-      "models": [
-        {
-          "name": "Foo"
-        }
-      ]
-      }`;
+  "name": "Simple App",
+  "models": [
+    {
+      "name": "Foo"
+    }
+  ]
+}`;
 
     const defaultApp = `{
   "name": "Acme Products!",
@@ -151,7 +168,7 @@ if(document.location.search.indexOf('token=') === 1){
       "name": "Product",
       "attr": [
         {
-          "name": "name", 
+          "name": "name",
           "type": "string"
         }
       ],
@@ -236,7 +253,7 @@ if(document.location.search.indexOf('token=') === 1){
       );
     }
    }
-    
+
    class Editor extends Component{
     componentDidMount(){
       var editor = ace.edit("editor");
@@ -290,7 +307,7 @@ if(document.location.search.indexOf('token=') === 1){
         if(props.match.params.app){
           app = decodeURIComponent(props.match.params.app);
           AppGenerator.generate(props.match.params.app);
-           
+
         }
         this.state = { app , error: {} };
         this.generate = this.generate.bind(this);
@@ -347,7 +364,7 @@ if(document.location.search.indexOf('token=') === 1){
                 !!gist.url && (
                   <div className='alert alert-success'>
                     Find your gist <a href={ url } target='_blank'>here.</a>
-                    
+
                     Open in jsbin <a href={ url.replace('github', 'jsbin') } target='_blank'>here.</a>
                   </div>
                 )
@@ -407,14 +424,14 @@ if(document.location.search.indexOf('token=') === 1){
                     </label>
                     <button className='btn btn-default' onClick={ signOut }>Sign Out</button>
                   </div>
-                ) 
+                )
               }
               {
                 !user.id && (
                   <a className='btn btn-primary' href='/login/github'>
                     Log in Through Github
                   </a>
-                ) 
+                )
               }
               </div>
             </div>
@@ -461,7 +478,7 @@ if(document.location.search.indexOf('token=') === 1){
         }
       }
     })(_Routes);
-    
+
     const App = ()=> {
       return (
       <Provider store = { store }>
